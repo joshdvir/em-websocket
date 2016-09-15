@@ -3,7 +3,7 @@
 module EventMachine
   module WebSocket
     module MessageProcessor03
-      def message(message_type, extension_data, application_data)
+      def message(message_type, extension_data, message)
         case message_type
         when :close
           @close_info = {
@@ -19,22 +19,24 @@ module EventMachine
           else
             # Acknowlege close
             # The connection is considered closed
-            send_frame(:close, application_data)
+            send_frame(:close, message.data)
             @connection.close_connection_after_writing
           end
         when :ping
           # Pong back the same data
-          send_frame(:pong, application_data)
-          @connection.trigger_on_ping(application_data)
+          send_frame(:pong, message.data)
+          @connection.trigger_on_ping(message.data)
         when :pong
-          @connection.trigger_on_pong(application_data)
+          @connection.trigger_on_pong(message.data)
         when :text
-          if application_data.respond_to?(:force_encoding)
-            application_data.force_encoding("UTF-8")
+          message = @connection.extensions.process_incoming_message(message)
+          if message.data.respond_to?(:force_encoding)
+            message.data.force_encoding("UTF-8")
           end
-          @connection.trigger_on_message(application_data)
+           @connection.trigger_on_message(message.data)
         when :binary
-          @connection.trigger_on_binary(application_data)
+          message = @connection.extensions.process_incoming_message(message)
+          @connection.trigger_on_binary(message.data)
         end
       end
 

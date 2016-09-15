@@ -8,6 +8,9 @@ module EventMachine
     # Connections are given 60s to close after being sent a close handshake
     @close_timeout = 60
 
+    Frame = Class.new { attr_accessor :final, :rsv1, :rsv2, :rsv3, :opcode, :masked, :masking_key, :payload }
+    Message = Class.new { attr_accessor :rsv1, :rsv2, :rsv3, :opcode, :data }
+
     # All errors raised by em-websocket should descend from this class
     class WebSocketError < RuntimeError; end
 

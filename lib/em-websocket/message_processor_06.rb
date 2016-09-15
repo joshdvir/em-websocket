@@ -1,12 +1,12 @@
 module EventMachine
   module WebSocket
     module MessageProcessor06
-      def message(message_type, extension_data, application_data)
-        debug [:message_received, message_type, application_data]
-        
+      def message(message_type, extension_data, message)
+        debug [:message_received, message_type, message]
+
         case message_type
         when :close
-          status_code = case application_data.length
+          status_code = case message.data.length
           when 0
             # close messages MAY contain a body
             nil
@@ -14,14 +14,14 @@ module EventMachine
             # Illegal close frame
             raise WSProtocolError, "Close frames with a body must contain a 2 byte status code"
           else
-            application_data.slice!(0, 2).unpack('n').first
+            message.data.slice!(0, 2).unpack('n').first
           end
-          
-          debug [:close_frame_received, status_code, application_data]
-          
+
+          debug [:close_frame_received, status_code, message.data]
+
           @close_info = {
             :code => status_code || 1005,
-            :reason => application_data,
+            :reason => message.data,
             :was_clean => true,
           }
 
@@ -38,20 +38,22 @@ module EventMachine
           end
         when :ping
           # Pong back the same data
-          send_frame(:pong, application_data)
-          @connection.trigger_on_ping(application_data)
+          send_frame(:pong, message.data)
+          @connection.trigger_on_ping(message.data)
         when :pong
-          @connection.trigger_on_pong(application_data)
+          @connection.trigger_on_pong(message.data)
         when :text
-          if application_data.respond_to?(:force_encoding)
-            application_data.force_encoding("UTF-8")
-            unless application_data.valid_encoding?
+          message = @connection.extensions.process_incoming_message(message)
+          if message.data.respond_to?(:force_encoding)
+            message.data.force_encoding("UTF-8")
+            unless message.data.valid_encoding?
               raise InvalidDataError, "Invalid UTF8 data"
             end
           end
-          @connection.trigger_on_message(application_data)
+          @connection.trigger_on_message(message.data)
         when :binary
-          @connection.trigger_on_binary(application_data)
+          message = @connection.extensions.process_incoming_message(message)
+          @connection.trigger_on_binary(message.data)
         end
       end
 

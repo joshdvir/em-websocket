@@ -1,7 +1,7 @@
 module EventMachine
   module WebSocket
     module Handshake75
-      def self.handshake(headers, path, secure)
+      def self.handshake(headers, path, secure, _)
         scheme = (secure ? "wss" : "ws")
         location = "#{scheme}://#{headers['host']}#{path}"
 

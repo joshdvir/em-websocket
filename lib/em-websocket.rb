@@ -1,6 +1,7 @@
 $:.unshift(File.dirname(__FILE__) + '/../lib')
 
 require "eventmachine"
+require "websocket/extensions"
 
 %w[
   debugger websocket connection

@@ -4,7 +4,7 @@ require 'base64'
 module EventMachine
   module WebSocket
     module Handshake04
-      def self.handshake(headers, _, __)
+      def self.handshake(headers, _, __, extensions)
         # Required
         unless key = headers['sec-websocket-key']
           raise HandshakeError, "sec-websocket-key header is required"
@@ -22,8 +22,8 @@ module EventMachine
           upgrade << "Sec-WebSocket-Protocol: #{protocol}"
         end
 
-        # TODO: Support sec-websocket-protocol selection
-        # TODO: sec-websocket-extensions
+        ext = extensions.generate_response(headers['sec-websocket-extensions'])
+        upgrade << "Sec-WebSocket-Extensions: #{ext}"
 
         return upgrade.join("\r\n") + "\r\n\r\n"
       end

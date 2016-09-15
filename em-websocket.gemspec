@@ -22,4 +22,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency("eventmachine", ">= 0.12.9")
   s.add_dependency("http_parser.rb", '~> 0.6.0')
+  s.add_dependency("websocket-extensions", ">= 0.1.0")
 end

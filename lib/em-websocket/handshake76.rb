@@ -3,7 +3,7 @@ require 'digest/md5'
 module EventMachine::WebSocket
   module Handshake76
     class << self
-      def handshake(headers, path, secure)
+      def handshake(headers, path, secure, _)
         challenge_response = solve_challenge(
           headers['sec-websocket-key1'],
           headers['sec-websocket-key2'],

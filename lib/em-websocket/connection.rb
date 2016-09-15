@@ -3,6 +3,7 @@ module EventMachine
     class Connection < EventMachine::Connection
       include Debugger
 
+      attr_reader :extensions
       attr_writer :max_frame_size
 
       # define WebSocket callbacks
@@ -48,6 +49,9 @@ module EventMachine
         @outbound_limit = options[:outbound_limit] || 0
 
         @handler = nil
+
+        @extensions = ::WebSocket::Extensions.new
+        options.fetch(:extensions, []).each { |e| @extensions.add(e) }
 
         debug [:initialize]
       end
@@ -114,7 +118,7 @@ module EventMachine
           send_flash_cross_domain_file
         else
           @handshake ||= begin
-            handshake = Handshake.new(@secure || @secure_proxy)
+            handshake = Handshake.new(@secure || @secure_proxy, @extensions)
 
             handshake.callback { |upgrade_response, handler_klass|
               debug [:accepting_ws_version, handshake.protocol_version]

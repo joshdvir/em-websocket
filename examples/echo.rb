@@ -1,7 +1,13 @@
 require File.expand_path('../../lib/em-websocket', __FILE__)
+require 'permessage_deflate'
+
+deflate = PermessageDeflate.configure(
+  :no_context_takeover => false,
+  :level => Zlib::BEST_COMPRESSION
+)
 
 EM.run {
-  EM::WebSocket.run(:host => "0.0.0.0", :port => 8080, :debug => false) do |ws|
+  EM::WebSocket.run(:host => "0.0.0.0", :port => 8080, :extensions => [deflate], :debug => false) do |ws|
     ws.onopen { |handshake|
       puts "WebSocket opened #{{
         :path => handshake.path,
