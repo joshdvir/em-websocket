@@ -23,7 +23,7 @@ module EventMachine
         end
 
         ext = extensions.generate_response(headers['sec-websocket-extensions'])
-        upgrade << "Sec-WebSocket-Extensions: #{ext}" #unless ext.empty?
+        upgrade << "Sec-WebSocket-Extensions: #{ext}" unless ext.nil?
 
         return upgrade.join("\r\n") + "\r\n\r\n"
       end
